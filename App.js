@@ -5,35 +5,123 @@ import {
   Text,
   View,
   Button,
+  TextInput
 } from 'react-native';
 import { Provider } from 'react-redux';
 import { createStore } from 'redux';
 import Reducers from './src/reducers';
-import UsersListComponent from './src/components/UsersListComponent'
+import FirebaseMainService from './src/services/FirebaseMainService';
 
-const App = () => (
-  <Provider store={createStore(Reducers)}> 
-    <View style={styles.container}>
-      <Text style={styles.welcome}>
-        Aplicación de Prueba con ¡React Native!
-      </Text>
-      <UsersListComponent />
-    </View>
-  </Provider>
-); 
+export default class App extends Component {
+  
+  constructor(props) {
+    super(props);
 
-export default App;
+    this.state = {
+      signInEmail: '',
+      signInPassword: '',
+      signUpEmail: '',
+      signUpPassword: '',
+      signUpConfirmPassword: '',
+    };
+  }
+
+  AppTemplate = (
+    <Provider store={createStore(Reducers)}> 
+      <View style={styles.container}>
+        <Text style={styles.welcome}>
+          ¡Simple Login With Firebase and React Native!
+        </Text>
+        <View style={styles.inputs}>
+          <TextInput style={styles.textInput} 
+            placeholder="E-mail"
+            onChangeText={(email) => this.setState({signInEmail: email})}>
+          </TextInput>
+          <TextInput style={styles.textInput}
+            secureTextEntry={true} 
+            placeholder="Password"
+            onChangeText={(password) => this.setState({signInPassword: password})}>
+          </TextInput>
+          <Button style={styles.button} onPress={this.signIn.bind(this)} title="Sign in"></Button> 
+          <Text style={styles.orText}>OR</Text>
+          <TextInput style={styles.textInput}
+            placeholder="E-mail"
+            onChangeText={(email) => this.setState({signUpEmail: email})}>
+          </TextInput>
+          <TextInput style={styles.textInput}
+            secureTextEntry={true} 
+            placeholder="Password"
+            onChangeText={(password) => this.setState({signUpPassword: password})}>
+          </TextInput>
+          <TextInput style={styles.textInput} 
+            secureTextEntry={true}
+            placeholder="Confirm Password"
+            onChangeText={(confirmPassword) => this.setState({signUpConfirmPassword: confirmPassword})}>
+          </TextInput>
+          <Button style={styles.button} onPress={this.signUp.bind(this)} title="Sign up"></Button>        
+        </View>
+      </View>
+    </Provider>
+  ); 
+
+  render() {
+    return this.AppTemplate;
+  } 
+
+  signUp() {
+    if (this.state.signUpPassword != this.state.signUpConfirmPassword){
+      alert("Confirm Password wrong, try again");
+    } else 
+      FirebaseMainService.createUserWithEmailAndPassword(this.state.signUpEmail, this.state.signUpPassword).then(
+        (res) => {
+          alert('OK, this email now is validate');
+      }).catch(( (err) => {
+          alert(err)
+      }));
+  }
+  
+  signIn() {
+    FirebaseMainService.signInWithEmailAndPassword(this.state.signInEmail, this.state.signInPassword).then(
+      (res) => {
+        alert('OK, this email and password works.');
+    }).catch(( (err) => {
+        alert(err)
+    }));
+  }
+  
+
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    marginTop: 20, 
     backgroundColor: '#F5FCFF',
   },
   welcome: {
     fontSize: 20,
     textAlign: 'center',
-    margin: 10,
-  }
+    marginTop: 25,
+    marginBottom: 25,
+    marginLeft: 15,
+    marginRight: 15,
+  }, 
+  inputs: {
+    flex: 1,
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  textInput: {
+    width: '80%',
+    height: 30,
+    marginBottom: 20,
+  },
+  orText: {
+    marginTop: 25,
+    marginBottom: 25,
+  },
+  button: {
+
+  },
 });
