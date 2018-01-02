@@ -9,14 +9,21 @@ import {
 } from 'react-native';
 import { Provider } from 'react-redux';
 import { createStore } from 'redux';
-import Reducers from './src/reducers';
+import configureStore from './src/store/configureStore'
 import FirebaseMainService from './src/services/FirebaseMainService';
+import * as UsersActions from './src/actions/usersActions'
+import User from './src/model/user';
+
+// Inicialización del Store
+const store = configureStore();
+const unsubscribe = store.subscribe(() =>
+console.log(store.getState())
+);
 
 export default class App extends Component {
   
   constructor(props) {
     super(props);
-
     this.state = {
       signInEmail: '',
       signInPassword: '',
@@ -26,8 +33,9 @@ export default class App extends Component {
     };
   }
 
+
   AppTemplate = (
-    <Provider store={createStore(Reducers)}> 
+    <Provider store={store}> 
       <View style={styles.container}>
         <Text style={styles.welcome}>
           ¡Simple Login With Firebase and React Native!
@@ -74,7 +82,8 @@ export default class App extends Component {
     } else 
       FirebaseMainService.createUserWithEmailAndPassword(this.state.signUpEmail, this.state.signUpPassword).then(
         (res) => {
-          alert('OK, this email now is validate');
+          let user = new User(res.uid, this.state.signUpEmail, this.state.signUpPassword);
+          store.dispatch(UsersActions.saveNewUser(user));
       }).catch(( (err) => {
           alert(err)
       }));
@@ -88,10 +97,10 @@ export default class App extends Component {
         alert(err)
     }));
   }
-  
 
 };
 
+/***** STYLES *****/
 const styles = StyleSheet.create({
   container: {
     flex: 1,
