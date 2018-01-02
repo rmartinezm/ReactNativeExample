@@ -16,9 +16,6 @@ import User from './src/model/user';
 
 // Inicialización del Store
 const store = configureStore();
-const unsubscribe = store.subscribe(() =>
-console.log(store.getState())
-);
 
 export default class App extends Component {
   
@@ -28,11 +25,10 @@ export default class App extends Component {
       signInEmail: '',
       signInPassword: '',
       signUpEmail: '',
+      signUpUsername: '',
       signUpPassword: '',
-      signUpConfirmPassword: '',
     };
   }
-
 
   AppTemplate = (
     <Provider store={store}> 
@@ -56,15 +52,14 @@ export default class App extends Component {
             placeholder="E-mail"
             onChangeText={(email) => this.setState({signUpEmail: email})}>
           </TextInput>
-          <TextInput style={styles.textInput}
-            secureTextEntry={true} 
-            placeholder="Password"
-            onChangeText={(password) => this.setState({signUpPassword: password})}>
+          <TextInput style={styles.textInput} 
+            placeholder="Username"
+            onChangeText={(username) => this.setState({signUpUsername: username})}>
           </TextInput>
           <TextInput style={styles.textInput} 
             secureTextEntry={true}
-            placeholder="Confirm Password"
-            onChangeText={(confirmPassword) => this.setState({signUpConfirmPassword: confirmPassword})}>
+            placeholder="Password"
+            onChangeText={(password) => this.setState({signUpPassword: password})}>
           </TextInput>
           <Button style={styles.button} onPress={this.signUp.bind(this)} title="Sign up"></Button>        
         </View>
@@ -77,16 +72,13 @@ export default class App extends Component {
   } 
 
   signUp() {
-    if (this.state.signUpPassword != this.state.signUpConfirmPassword){
-      alert("Confirm Password wrong, try again");
-    } else 
-      FirebaseMainService.createUserWithEmailAndPassword(this.state.signUpEmail, this.state.signUpPassword).then(
-        (res) => {
-          let user = new User(res.uid, this.state.signUpEmail, this.state.signUpPassword);
-          store.dispatch(UsersActions.saveNewUser(user));
+    FirebaseMainService.createUserWithEmailAndPassword(this.state.signUpEmail, this.state.signUpPassword).then(
+      (res) => {
+        let user = new User(res.uid, this.state.signUpEmail, this.state.signUpUsername);
+        store.dispatch(UsersActions.saveNewUser(user));
       }).catch(( (err) => {
           alert(err)
-      }));
+    }));
   }
   
   signIn() {

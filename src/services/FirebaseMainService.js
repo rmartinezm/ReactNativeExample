@@ -30,23 +30,16 @@ export default{
             firebase.database().ref().child('users').on('value', (snapshot) => {
                 let users = [];    
                 snapshot.forEach((snapshotChild) => {
-                    let user = new User(snapshotChild.val().email, snapshotChild.val().name);
+                    let user = new User(snapshotChild.val().id, snapshotChild.val().email, snapshotChild.val().name);
                     users.push(user);
-                    user = new User();
                 });
-                req(users);    
+                req(users)    
             });
         });
     },
 
     saveUserInDatabase: (user) => {
-        return new Promise((req, rej) => {
-            firebase.database().ref().child('users').child(user.id).set(user).then(
-                (res) => {
-                    req(res);
-                }
-            ).catch( (err) => { rej(err) });
-        });
+        return firebase.database().ref().child('users').child(user.id).set(user);
     }
 
 }
